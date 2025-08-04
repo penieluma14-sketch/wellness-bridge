@@ -7,9 +7,21 @@ app = Flask(__name__)
 with open("illness_model.pkl", "rb") as f:
     illness_model = pickle.load(f)
 
+# Root route so Render home page works
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({
+        "message": "Medical Diagnosis API is running. Send a POST request to /diagnose with symptom data."
+    })
+
+# Diagnose route
 @app.route('/diagnose', methods=['POST'])
 def diagnose():
-    symptoms = request.json['symptoms']  # list/array of encoded symptoms
+    data = request.get_json()
+    if not data or 'symptoms' not in data:
+        return jsonify({"error": "Please provide 'symptoms' in JSON body"}), 400
+    
+    symptoms = data['symptoms']  # list/array of encoded symptoms
     
     # Predict probabilities
     probabilities = illness_model.predict_proba([symptoms])[0]
@@ -27,6 +39,7 @@ def diagnose():
     return jsonify({illness: round(prob, 2) for illness, prob in results})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
+
 
 
