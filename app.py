@@ -1,36 +1,32 @@
-from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
-import joblib
+from flask import Flask, request, jsonify
+import pickle
 
-# Create Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for cross-origin requests
 
-# Load trained model
-model = joblib.load("illness_model.pkl")
+# Load model
+with open("illness_model.pkl", "rb") as f:
+    illness_model = pickle.load(f)
 
-# Define feature order (must match training)
-features = ["fever", "cough", "headache", "nausea"]
+@app.route('/diagnose', methods=['POST'])
+def diagnose():
+    symptoms = request.json['symptoms']  # list/array of encoded symptoms
+    
+    # Predict probabilities
+    probabilities = illness_model.predict_proba([symptoms])[0]
+    
+    # Get illness labels
+    illnesses = illness_model.classes_
+    
+    # Sort by probability (highest first)
+    results = sorted(
+        zip(illnesses, probabilities),
+        key=lambda x: x[1],
+        reverse=True
+    )
+    
+    return jsonify({illness: round(prob, 2) for illness, prob in results})
 
-# Home route – serves the HTML page
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-# API endpoint for predictions
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.get_json()
-
-    # Convert symptoms into binary feature list
-    input_features = [1 if symptom in data["symptoms"] else 0 for symptom in features]
-
-    # Predict using model
-    prediction = model.predict([input_features])[0]
-
-    return jsonify({"diagnosis": prediction})
-
-# Run locally
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
+
 
