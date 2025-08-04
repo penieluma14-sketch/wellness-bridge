@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wellness Bridge</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Wellness Bridge – AI Symptom Checker</h1>
+
+  <form id="symptomForm">
+    <label for="symptomInput">Enter your symptoms (comma-separated):</label><br>
+    <input type="text" id="symptomInput" placeholder="e.g. fever, cough, headache">
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="resultContainer">
+    <h3>Possible Diagnosis:</h3>
+    <p id="diagnosisOutput">Awaiting input...</p>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
