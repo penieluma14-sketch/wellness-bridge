@@ -22,20 +22,28 @@ features = [
     "chest_pain"
 ]
 
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 @app.route("/predict", methods=["POST"])
 def predict():
     data = request.get_json()
 
-    # Generate feature vector in the same order as training
-    input_features = [1 if symptom in data["symptoms"] else 0 for symptom in features]
+    # Convert all symptoms to lowercase and replace spaces with underscores
+    input_symptoms = [s.lower().replace(" ", "_") for s in data["symptoms"]]
 
+    # Create the feature vector in the correct order
+    input_features = [1 if feature in input_symptoms else 0 for feature in features]
+
+    # Make prediction
     prediction = model.predict([input_features])[0]
+
     return jsonify({"diagnosis": prediction})
 
-
 if __name__ == "__main__":
-    app.run(debug=True)  # Local development server
+    app.run(debug=True)
+
 
 
 
