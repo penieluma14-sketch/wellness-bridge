@@ -1,45 +1,29 @@
-from flask import Flask, request, jsonify
-import pickle
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
+import joblib
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
-# Load model
-with open("illness_model.pkl", "rb") as f:
-    illness_model = pickle.load(f)
+# Load trained model
+model = joblib.load("illness_model.pkl")
 
-# Root route so Render home page works
-@app.route('/', methods=['GET'])
+# Feature order (must match training)
+features = ["fever", "cough", "headache", "nausea"]
+
+@app.route("/")
 def home():
-    return jsonify({
-        "message": "Medical Diagnosis API is running. Send a POST request to /diagnose with symptom data."
-    })
+    return render_template("index.html")
 
-# Diagnose route
-@app.route('/diagnose', methods=['POST'])
-def diagnose():
+@app.route("/predict", methods=["POST"])
+def predict():
     data = request.get_json()
-    if not data or 'symptoms' not in data:
-        return jsonify({"error": "Please provide 'symptoms' in JSON body"}), 400
-    
-    symptoms = data['symptoms']  # list/array of encoded symptoms
-    
-    # Predict probabilities
-    probabilities = illness_model.predict_proba([symptoms])[0]
-    
-    # Get illness labels
-    illnesses = illness_model.classes_
-    
-    # Sort by probability (highest first)
-    results = sorted(
-        zip(illnesses, probabilities),
-        key=lambda x: x[1],
-        reverse=True
-    )
-    
-    return jsonify({illness: round(prob, 2) for illness, prob in results})
+    input_features = [1 if symptom in data["symptoms"] else 0 for symptom in features]
+    prediction = model.predict([input_features])[0]
+    return jsonify({"diagnosis": prediction})
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(debug=True)  # Local development server
 
 
 
