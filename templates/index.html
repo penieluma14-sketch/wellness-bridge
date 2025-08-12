@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Symptom Checker</title>
+    <title>Cholera Diagnosis</title>
+    <script>
+        async function diagnose() {
+            let symptoms = [];
+            document.querySelectorAll("input[type=checkbox]:checked").forEach(cb => {
+                symptoms.push(cb.value);
+            });
+
+            let response = await fetch("/predict", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({symptoms: symptoms})
+            });
+
+            let result = await response.json();
+            localStorage.setItem("diagnosis", result.diagnosis);
+            window.location.href = "/result";
+        }
+    </script>
 </head>
 <body>
     <h2>Enter Symptoms</h2>
-    <form method="POST" action="/predict">
-        <label><input type="checkbox" name="symptoms" value="Fever"> Fever</label><br>
-        <label><input type="checkbox" name="symptoms" value="Cough"> Cough</label><br>
-        <label><input type="checkbox" name="symptoms" value="Headache"> Headache</label><br>
-        <label><input type="checkbox" name="symptoms" value="Fatigue"> Fatigue</label><br>
-        <label><input type="checkbox" name="symptoms" value="Sore throat"> Sore Throat</label><br>
-        <label><input type="checkbox" name="symptoms" value="Vomiting"> Vomiting</label><br>
-        <label><input type="checkbox" name="symptoms" value="Rash"> Rash</label><br>
-        <label><input type="checkbox" name="symptoms" value="Diarrhea"> Diarrhea</label><br>
-        <label><input type="checkbox" name="symptoms" value="Shortness of breath"> Shortness of Breath</label><br>
-        <label><input type="checkbox" name="symptoms" value="Chest pain"> Chest Pain</label><br><br>
-        <button type="submit">Submit</button>
-    </form>
-
-    <br>
-    <a href="/logout">Logout</a>
+    <label><input type="checkbox" value="fever"> Fever</label><br>
+    <label><input type="checkbox" value="diarrhea"> Diarrhea</label><br>
+    <label><input type="checkbox" value="vomiting"> Vomiting</label><br>
+    <label><input type="checkbox" value="dehydration"> Dehydration</label><br><br>
+    <button onclick="diagnose()">Submit</button>
 </body>
 </html>
+
+
 
