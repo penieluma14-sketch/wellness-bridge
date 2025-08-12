@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Wellness Bridge</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Symptom Checker</title>
 </head>
 <body>
-  <h1>Wellness Bridge – AI Symptom Checker</h1>
+    <h2>Enter Symptoms</h2>
+    <form method="POST" action="/predict">
+        <label><input type="checkbox" name="symptoms" value="Fever"> Fever</label><br>
+        <label><input type="checkbox" name="symptoms" value="Cough"> Cough</label><br>
+        <label><input type="checkbox" name="symptoms" value="Headache"> Headache</label><br>
+        <label><input type="checkbox" name="symptoms" value="Fatigue"> Fatigue</label><br>
+        <label><input type="checkbox" name="symptoms" value="Sore throat"> Sore Throat</label><br>
+        <label><input type="checkbox" name="symptoms" value="Vomiting"> Vomiting</label><br>
+        <label><input type="checkbox" name="symptoms" value="Rash"> Rash</label><br>
+        <label><input type="checkbox" name="symptoms" value="Diarrhea"> Diarrhea</label><br>
+        <label><input type="checkbox" name="symptoms" value="Shortness of breath"> Shortness of Breath</label><br>
+        <label><input type="checkbox" name="symptoms" value="Chest pain"> Chest Pain</label><br><br>
+        <button type="submit">Submit</button>
+    </form>
 
-  <form id="symptomForm">
-    <label for="symptomInput">Enter your symptoms (comma-separated):</label><br>
-    <input type="text" id="symptomInput" placeholder="e.g. fever, cough, headache">
-    <button type="submit">Submit</button>
-  </form>
-
-  <div id="resultContainer">
-    <h3>Possible Diagnosis:</h3>
-    <p id="diagnosisOutput">Awaiting input...</p>
-  </div>
-
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <br>
+    <a href="/logout">Logout</a>
 </body>
 </html>
+
