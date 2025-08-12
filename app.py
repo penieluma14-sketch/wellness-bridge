@@ -3,78 +3,64 @@ from flask_cors import CORS
 import joblib
 
 app = Flask(__name__)
-app.secret_key = "yoursecretkey"  # Needed for session handling
-CORS(app)  # Enable CORS for all routes
+app.secret_key = "supersecretkey"  # Needed for session management
+CORS(app)
 
-# Load trained model
-model = joblib.load("illness_model.pkl")
+# Load Cholera model
+model = joblib.load("cholera_model.pkl")
 
-# Feature order (must match training)
-features = [
-    "fever",
-    "cough",
-    "headache",
-    "fatigue",
-    "sore_throat",
-    "vomiting",
-    "rash",
-    "diarrhea",
-    "shortness_of_breath",
-    "chest_pain"
-]
+# Symptoms used for Cholera detection
+features = ["fever", "diarrhea", "vomiting", "dehydration"]
 
-# ===== LOGIN PAGE =====
-@app.route("/", methods=["GET", "POST"])
+# Simple login credentials
+USERNAME = "admin"
+PASSWORD = "password"
+
+@app.route("/")
 def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        # Example static login (you can replace with DB check)
-        if username == "admin" and password == "password":
-            session["user"] = username
-            return redirect(url_for("home"))
-        else:
-            return render_template("login.html", error="Invalid username or password")
-
     return render_template("login.html")
 
+@app.route("/login", methods=["POST"])
+def do_login():
+    username = request.form.get("username")
+    password = request.form.get("password")
 
-# ===== FORM PAGE =====
+    if username == USERNAME and password == PASSWORD:
+        session["logged_in"] = True
+        return redirect(url_for("home"))
+    else:
+        return "❌ Invalid username or password. <a href='/'>Try again</a>"
+
 @app.route("/home")
 def home():
-    if "user" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
     return render_template("index.html")
 
-
-# ===== RESULT PAGE =====
 @app.route("/predict", methods=["POST"])
 def predict():
-    if "user" not in session:
+    if not session.get("logged_in"):
         return redirect(url_for("login"))
 
-    symptoms = request.form.getlist("symptoms")
-
-    # Normalize input
-    input_symptoms = [s.lower().replace(" ", "_") for s in symptoms]
+    data = request.get_json()
+    input_symptoms = [s.lower().replace(" ", "_") for s in data["symptoms"]]
     input_features = [1 if feature in input_symptoms else 0 for feature in features]
 
-    # Prediction
     prediction = model.predict([input_features])[0]
 
-    return render_template("result.html", diagnosis=prediction)
+    diagnosis = "Cholera detected" if prediction == 1 else "No Cholera detected"
+    return jsonify({"diagnosis": diagnosis})
 
-
-# ===== LOGOUT =====
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    return redirect(url_for("login"))
-
+@app.route("/result")
+def result():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
+    return render_template("result.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
 
 
 
