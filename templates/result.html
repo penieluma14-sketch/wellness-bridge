@@ -2,10 +2,15 @@
 <html>
 <head>
     <title>Diagnosis Result</title>
+    <script>
+        window.onload = function() {
+            document.getElementById("result").innerText = localStorage.getItem("diagnosis");
+        }
+    </script>
 </head>
 <body>
-    <h2>Your Diagnosis:</h2>
-    <p>{{ diagnosis }}</p>
-    <a href="/home">Go Back</a> | <a href="/logout">Logout</a>
+    <h2>Diagnosis Result</h2>
+    <p id="result"></p>
+    <a href="/home">Check Again</a>
 </body>
 </html>
